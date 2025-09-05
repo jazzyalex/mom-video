@@ -185,20 +185,26 @@
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
     
     <script>
-        // Firebase config - using a public test project (replace with your own for production)
-        const firebaseConfig = {
-            apiKey: "AIzaSyBQh0u3PolAXU-VEFHOqyJ6KjGr_dJ5pLk",
-            authDomain: "webrtc-test-49d22.firebaseapp.com",
-            databaseURL: "https://webrtc-test-49d22-default-rtdb.firebaseio.com",
-            projectId: "webrtc-test-49d22",
-            storageBucket: "webrtc-test-49d22.appspot.com",
-            messagingSenderId: "835739549947",
-            appId: "1:835739549947:web:8a6c5e8b5e9c5f8d"
-        };
-        
-        // Initialize Firebase
-        firebase.initializeApp(firebaseConfig);
-        const database = firebase.database();
+// Import the functions you need from the SDKs you need
+import { initializeApp } from "firebase/app";
+// TODO: Add SDKs for Firebase products that you want to use
+// https://firebase.google.com/docs/web/setup#available-libraries
+
+// Your web app's Firebase configuration
+// For Firebase JS SDK v7.20.0 and later, measurementId is optional
+const firebaseConfig = {
+  apiKey: "AIzaSyAlw8DCrAgKKx6kOiXUb552znMvKz-yTsY",
+  authDomain: "mom-video-call.firebaseapp.com",
+  projectId: "mom-video-call",
+  storageBucket: "mom-video-call.firebasestorage.app",
+  messagingSenderId: "1051927207225",
+  appId: "1:1051927207225:web:88d8d895d135e6ed9e5ce8",
+  measurementId: "G-JLVCBM279E"
+};
+
+// Initialize Firebase
+const app = initializeApp(firebaseConfig);
+
         
         let localStream = null;
         let remoteStream = null;
