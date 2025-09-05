@@ -1,0 +1,12 @@
+{
+  "name": "simple-video-call",
+  "version": "1.0.0",
+  "description": "Simple one-click video calling app for seniors",
+  "main": "index.html",
+  "scripts": {
+    "start": "python3 -m http.server 8000 || python -m SimpleHTTPServer 8000"
+  },
+  "keywords": ["webrtc", "video-call", "simple", "senior-friendly"],
+  "author": "",
+  "license": "MIT"
+}
