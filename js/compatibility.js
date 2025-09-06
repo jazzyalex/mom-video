@@ -4,15 +4,19 @@ class CompatibilityManager {
     }
 
     init() {
-        this.performChecks();
+        // Apply polyfills first so capability checks reflect shims
         this.addPolyfills();
+        this.performChecks();
         debugLogger.info('Compatibility checks completed');
         this.logCapabilities();
     }
 
     performChecks() {
-        this.checks.webrtc = !!window.RTCPeerConnection;
-        this.checks.mediaDevices = !!(navigator.mediaDevices && navigator.mediaDevices.getUserMedia);
+        // After polyfills, these checks should succeed on older Chrome
+        this.checks.webrtc = !!(window.RTCPeerConnection || window.webkitRTCPeerConnection || window.mozRTCPeerConnection || window.msRTCPeerConnection);
+        const hasModern = !!(navigator.mediaDevices && navigator.mediaDevices.getUserMedia);
+        const hasLegacy = !!(navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia);
+        this.checks.mediaDevices = hasModern || hasLegacy;
         this.checks.promises = typeof Promise !== 'undefined';
         this.checks.arrow = (() => { try { eval('()=>{}'); return true; } catch(e) { return false; } })();
         this.checks.asyncAwait = (() => { try { eval('async function test(){}'); return true; } catch(e) { return false; } })();

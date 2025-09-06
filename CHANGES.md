@@ -13,6 +13,7 @@ All notable changes to this project are documented here.
 - UX (RU): Translated UI text to Russian across HTML and runtime status messages.
 - Debug UI: Hidden on-screen debug panel by default; still available via `?debug=1` if needed.
 - Fix: Hide the “Ожидание видео…” overlay when remote video starts (on `ontrack`, and also on `remoteVideo` `playing/loadeddata`).
+- Chrome 55 support: Reordered polyfills to run before capability checks, broadened legacy getUserMedia detection, and removed optional chaining (`?.`) from client code (js/ui.js, js/webrtc.js).
 
 ## 2025-09-05
 

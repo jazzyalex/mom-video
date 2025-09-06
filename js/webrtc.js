@@ -127,7 +127,7 @@ class WebRTCManager {
         
         if (event.track.kind === 'video') {
             this.remoteVideoReceived = true;
-            if (typeof uiManager?.hideWaitingForVideo === 'function') {
+            if (typeof uiManager !== 'undefined' && uiManager && typeof uiManager.hideWaitingForVideo === 'function') {
                 uiManager.hideWaitingForVideo();
             } else {
                 const waitingElement = document.getElementById('waitingForVideo');

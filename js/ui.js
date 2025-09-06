@@ -115,7 +115,7 @@ class UIManager {
     }
 
     copyLink() {
-        const link = this.elements.callLink?.textContent;
+        const link = this.elements.callLink ? this.elements.callLink.textContent : '';
         if (!link) return;
 
         debugLogger.info('Copying link: ' + link);
@@ -164,7 +164,7 @@ class UIManager {
     }
 
     shareLink() {
-        const link = this.elements.callLink?.textContent;
+        const link = this.elements.callLink ? this.elements.callLink.textContent : '';
         if (!link) return;
 
         if (navigator.share) {
