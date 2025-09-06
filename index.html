@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Video Call</title>
+    <title>Видеозвонок</title>
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
@@ -15,18 +15,18 @@
     <div id="versionInfo">v2025.09.06-modular</div>
     
     <div id="startScreen">
-        <h1>Video Call</h1>
-        <button id="createCallBtn">Start New Call</button>
-        <button id="joinCallBtn" style="display:none">Join Call</button>
+        <h1>Видеозвонок</h1>
+        <button id="createCallBtn">Начать звонок</button>
+        <button id="joinCallBtn" style="display:none">Присоединиться к звонку</button>
         
         <div id="linkDisplay">
-            <p>Share this link:</p>
+            <p>Поделитесь ссылкой:</p>
             <div id="callLink"></div>
-            <button id="copyBtn">Copy Link</button>
-            <button id="shareBtn">Share</button>
-            <button id="debugToggle">Show Debug Info</button>
+            <button id="copyBtn">Скопировать ссылку</button>
+            <button id="shareBtn">Поделиться</button>
+            <button id="debugToggle" style="display:none">Показать отладку</button>
             <div class="spinner"></div>
-            <p>Waiting for someone to join...</p>
+            <p>Ожидание подключения собеседника...</p>
         </div>
     </div>
     
@@ -35,10 +35,10 @@
         <video id="localVideo" playsinline autoplay muted></video>
         <div id="waitingForVideo">
             <div class="spinner"></div>
-            <p style="margin-top: 20px;">Waiting for video...</p>
+            <p style="margin-top: 20px;">Ожидание видео...</p>
         </div>
-        <div id="status">Connecting...</div>
-        <button id="endCallBtn">End Call</button>
+        <div id="status">Соединение...</div>
+        <button id="endCallBtn">Завершить звонок</button>
     </div>
     
     <div id="debugPanel"></div>

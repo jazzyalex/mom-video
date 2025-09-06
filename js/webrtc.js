@@ -48,6 +48,15 @@ class WebRTCManager {
         this.roomId = Math.random().toString(36).substring(2, 12);
         this.isInitiator = true;
         this.debug.info('Created room: ' + this.roomId);
+        if (typeof debugLogger !== 'undefined') {
+            debugLogger.setRoomId(this.roomId);
+            debugLogger.setRole('caller');
+            try {
+                if (this.database && debugLogger.sessionId) {
+                    this.database.ref(`rooms/${this.roomId}/sessions/caller`).set(debugLogger.sessionId);
+                }
+            } catch (_) {}
+        }
         return this.roomId;
     }
 
@@ -55,6 +64,15 @@ class WebRTCManager {
         this.roomId = roomId;
         this.isInitiator = false;
         this.debug.info('Joining room: ' + roomId);
+        if (typeof debugLogger !== 'undefined') {
+            debugLogger.setRoomId(roomId);
+            debugLogger.setRole('callee');
+            try {
+                if (this.database && debugLogger.sessionId) {
+                    this.database.ref(`rooms/${roomId}/sessions/callee`).set(debugLogger.sessionId);
+                }
+            } catch (_) {}
+        }
     }
 
     async setupPeerConnection(useSimpleConfig = false) {
@@ -109,7 +127,7 @@ class WebRTCManager {
             if (waitingElement) {
                 waitingElement.classList.remove('show');
             }
-            uiManager.setStatus('Connected!');
+            uiManager.setStatus('Подключено!');
             this.clearConnectionTimeout();
         }
     }
@@ -137,14 +155,14 @@ class WebRTCManager {
             case 'connected':
                 this.debug.success('WebRTC connected!');
                 if (this.remoteVideoReceived) {
-                    uiManager.setStatus('Connected!');
+                    uiManager.setStatus('Подключено!');
                 } else {
-                    uiManager.setStatus('Connected - waiting for video...');
+                    uiManager.setStatus('Подключено — ожидание видео...');
                 }
                 this.clearConnectionTimeout();
                 break;
             case 'connecting':
-                uiManager.setStatus('Establishing connection...');
+                uiManager.setStatus('Устанавливаем соединение...');
                 this.setConnectionTimeout();
                 break;
             case 'failed':
@@ -153,7 +171,7 @@ class WebRTCManager {
                 break;
             case 'disconnected':
                 this.debug.error('Connection lost');
-                uiManager.setStatus('Connection lost');
+                uiManager.setStatus('Соединение потеряно');
                 break;
         }
     }
@@ -164,12 +182,12 @@ class WebRTCManager {
         
         switch(state) {
             case 'checking':
-                uiManager.setStatus('Finding connection path...');
+                uiManager.setStatus('Поиск пути соединения...');
                 break;
             case 'connected':
             case 'completed':
                 if (this.remoteVideoReceived) {
-                    uiManager.setStatus('Connected!');
+                    uiManager.setStatus('Подключено!');
                 }
                 break;
             case 'failed':
@@ -177,7 +195,7 @@ class WebRTCManager {
                 this.handleConnectionFailure();
                 break;
             case 'disconnected':
-                uiManager.setStatus('Connection interrupted');
+                uiManager.setStatus('Соединение прервано');
                 break;
         }
     }
@@ -187,7 +205,7 @@ class WebRTCManager {
         this.debug.info('ICE gathering state: ' + state);
         
         if (state === 'gathering') {
-            uiManager.setStatus('Gathering network info...');
+            uiManager.setStatus('Сбор сетевой информации...');
         }
     }
 
@@ -225,7 +243,7 @@ class WebRTCManager {
         if (this.retryCount < this.maxRetries) {
             this.retryCount++;
             this.debug.warn(`Connection failed, retrying (${this.retryCount}/${this.maxRetries})`);
-            uiManager.setStatus(`Connection failed - retrying (${this.retryCount}/${this.maxRetries})...`);
+            uiManager.setStatus(`Не удалось подключиться — повторяем попытку (${this.retryCount}/${this.maxRetries})...`);
             
             setTimeout(async () => {
                 try {
@@ -242,7 +260,7 @@ class WebRTCManager {
 
     showFinalError() {
         this.debug.error('All connection attempts failed');
-        uiManager.setStatus('Connection failed - please refresh and try again');
+        uiManager.setStatus('Не удалось подключиться — обновите страницу и попробуйте снова');
     }
 
     async restartConnection() {
@@ -339,7 +357,7 @@ class WebRTCManager {
             
         } catch (recoveryErr) {
             this.debug.error('Recovery failed: ' + recoveryErr.message);
-            uiManager.setStatus('Connection failed - please refresh and try again');
+            uiManager.setStatus('Не удалось подключиться — обновите страницу и попробуйте снова');
             throw recoveryErr;
         }
     }
@@ -356,10 +374,10 @@ class WebRTCManager {
                     this.remoteDescriptionSet = true;
                     await this.flushPendingCandidates();
                     uiManager.showVideoCall();
-                    uiManager.setStatus('Finalizing connection...');
+                    uiManager.setStatus('Завершаем подключение...');
                 } catch (err) {
                     this.debug.error('Error setting remote description: ' + err.message);
-                    uiManager.setStatus('Error connecting - please try again');
+                    uiManager.setStatus('Ошибка подключения — попробуйте ещё раз');
                 }
             }
         });
@@ -387,14 +405,14 @@ class WebRTCManager {
                     sdp: answer.sdp
                 });
                 this.debug.success('Answer stored in Firebase');
-                uiManager.setStatus('Finalizing connection...');
+                uiManager.setStatus('Завершаем подключение...');
             } else {
                 this.debug.error('No offer found in Firebase!');
-                uiManager.setStatus('Call not found - ask for a new link');
+                uiManager.setStatus('Звонок не найден — попросите новую ссылку');
             }
         } catch (err) {
             this.debug.error('Error handling offer: ' + err.message);
-            uiManager.setStatus('Error joining call - please try again');
+            uiManager.setStatus('Ошибка при присоединении — попробуйте ещё раз');
             throw err;
         }
     }
@@ -431,19 +449,19 @@ class WebRTCManager {
 
     async startCall() {
         try {
-            uiManager.setStatus('Setting up connection...');
+            uiManager.setStatus('Подготовка соединения...');
             await this.setupPeerConnection();
             
-            uiManager.setStatus('Creating call offer...');
+            uiManager.setStatus('Создание предложения...');
             await this.createOffer();
             
             this.setupCandidateListening();
             this.setupCallEndListening();
             
-            uiManager.setStatus('Waiting for someone to join...');
+            uiManager.setStatus('Ожидание подключения собеседника...');
         } catch (err) {
             this.debug.error('Failed to start call: ' + err.message);
-            uiManager.setStatus('Failed to start call - click to retry');
+            uiManager.setStatus('Не удалось начать звонок — нажмите, чтобы повторить');
             this.addRetryButton();
             throw err;
         }
@@ -454,7 +472,7 @@ class WebRTCManager {
         if (linkDisplay && !document.getElementById('retryBtn')) {
             const retryBtn = document.createElement('button');
             retryBtn.id = 'retryBtn';
-            retryBtn.textContent = 'Retry Connection';
+            retryBtn.textContent = 'Повторить подключение';
             retryBtn.style.cssText = `
                 background: #ff9800;
                 color: white;

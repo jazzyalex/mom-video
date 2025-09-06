@@ -58,7 +58,7 @@ class UIManager {
                 clearTimeout(this.statusTimeout);
             }
             
-            if (message.includes('Connected') || message === '') {
+            if (message.includes('Connected') || message.includes('Подключено') || message === '') {
                 this.statusTimeout = setTimeout(() => {
                     if (this.elements.status) {
                         this.elements.status.style.display = 'none';
@@ -91,8 +91,7 @@ class UIManager {
         if (this.elements.waitingForVideo) {
             this.elements.waitingForVideo.classList.add('show');
         }
-
-        debugLogger.showPanel();
+        // Do not auto-show debug panel; logs are sent to Firebase
     }
 
     setLocalVideo(stream) {
@@ -141,7 +140,7 @@ class UIManager {
     showCopySuccess() {
         if (this.elements.copyBtn) {
             const originalText = this.elements.copyBtn.textContent;
-            this.elements.copyBtn.textContent = 'Copied!';
+            this.elements.copyBtn.textContent = 'Скопировано!';
             setTimeout(() => {
                 if (this.elements.copyBtn) {
                     this.elements.copyBtn.textContent = originalText;
@@ -156,8 +155,8 @@ class UIManager {
 
         if (navigator.share) {
             navigator.share({
-                title: 'Join my video call',
-                text: 'Click this link to join my video call',
+                title: 'Присоединиться к моему звонку',
+                text: 'Нажмите ссылку, чтобы присоединиться к звонку',
                 url: link
             }).catch(err => {
                 debugLogger.warn('Share cancelled: ' + err.message);
@@ -168,7 +167,7 @@ class UIManager {
     }
 
     confirmEndCall() {
-        if (confirm('End this call?')) {
+        if (confirm('Завершить звонок?')) {
             this.endCall();
         }
     }

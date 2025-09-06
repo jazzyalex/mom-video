@@ -91,12 +91,12 @@ class CompatibilityManager {
     }
 
     showUnsupportedMessage() {
-        const message = 'Your browser doesn\'t support video calling. Please try:\n\n' +
+        const message = 'Ваш браузер не поддерживает видеозвонки. Пожалуйста, попробуйте:\n\n' +
                        '• Chrome 60+\n' +
                        '• Firefox 60+\n' +
                        '• Safari 12+\n' +
                        '• Edge 79+\n\n' +
-                       'Or update your current browser.';
+                       'Либо обновите текущий браузер.';
         
         alert(message);
         debugLogger.error('Browser not supported');
@@ -104,9 +104,9 @@ class CompatibilityManager {
         const body = document.body;
         if (body) {
             body.innerHTML = '<div style="padding:20px;text-align:center;color:white;background:#1a1a1a;height:100vh;display:flex;align-items:center;justify-content:center;flex-direction:column;">' +
-                           '<h1>Browser Not Supported</h1>' +
-                           '<p style="margin:20px 0;">Your browser doesn\'t support video calling.</p>' +
-                           '<p>Please try Chrome, Firefox, Safari, or Edge.</p>' +
+                           '<h1>Браузер не поддерживается</h1>' +
+                           '<p style="margin:20px 0;">Ваш браузер не поддерживает видеозвонки.</p>' +
+                           '<p>Пожалуйста, используйте Chrome, Firefox, Safari или Edge.</p>' +
                            '</div>';
         }
     }

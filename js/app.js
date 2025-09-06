@@ -18,6 +18,8 @@ class VideoCallApp {
             }
             
             await this.initFirebase();
+            // Attach Firebase for cloud logging
+            debugLogger.attachDatabase(this.database);
             await this.initUI();
             await this.checkForRoomJoin();
             await this.setupEventListeners();
@@ -80,7 +82,7 @@ class VideoCallApp {
     async createCall() {
         try {
             debugLogger.info('Create call initiated');
-            uiManager.setStatus('Accessing camera...');
+            uiManager.setStatus('Доступ к камере...');
             
             const stream = await this.webrtcManager.getMediaStream();
             uiManager.setLocalVideo(stream);
@@ -101,12 +103,12 @@ class VideoCallApp {
     async joinCall() {
         try {
             debugLogger.info('Join call initiated');
-            uiManager.setStatus('Accessing camera...');
+            uiManager.setStatus('Доступ к камере...');
             
             const stream = await this.webrtcManager.getMediaStream();
             uiManager.setLocalVideo(stream);
             uiManager.showVideoCall();
-            uiManager.setStatus('Connecting to call...');
+            uiManager.setStatus('Подключение к звонку...');
             
             await this.webrtcManager.joinCall();
             debugLogger.success('Joined call successfully');
@@ -118,16 +120,16 @@ class VideoCallApp {
     }
 
     showMediaError(err) {
-        let message = 'Please allow camera and microphone access';
+        let message = 'Разрешите доступ к камере и микрофону';
         
         if (err.name === 'NotFoundError' || err.name === 'DevicesNotFoundError') {
-            message = 'Camera or microphone not found';
+            message = 'Камера или микрофон не найдены';
         } else if (err.name === 'NotAllowedError' || err.name === 'PermissionDeniedError') {
-            message = 'Camera and microphone access denied. Please allow access and refresh.';
+            message = 'Доступ к камере и микрофону запрещён. Разрешите доступ и обновите страницу.';
         } else if (err.name === 'NotReadableError' || err.name === 'TrackStartError') {
-            message = 'Camera or microphone is being used by another app';
+            message = 'Камера или микрофон заняты другим приложением';
         } else if (err.name === 'OverconstrainedError') {
-            message = 'Camera settings not supported';
+            message = 'Настройки камеры не поддерживаются';
         }
         
         alert(message);
@@ -135,7 +137,7 @@ class VideoCallApp {
     }
 
     showInitError(err) {
-        alert('Failed to start video call app. Please refresh the page and try again.');
+        alert('Не удалось запустить приложение. Обновите страницу и попробуйте снова.');
         debugLogger.error('Initialization error: ' + err.message);
     }
 }
