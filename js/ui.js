@@ -23,6 +23,14 @@ class UIManager {
 
         this.setupEventListeners();
         debugLogger.success('UI Manager initialized');
+
+        // Hide waiting overlay when remote video actually starts rendering
+        const rv = this.elements.remoteVideo;
+        if (rv) {
+            const hide = () => this.hideWaitingForVideo();
+            rv.addEventListener('playing', hide);
+            rv.addEventListener('loadeddata', hide);
+        }
     }
 
     setupEventListeners() {
@@ -45,6 +53,12 @@ class UIManager {
                 window.webrtcManager.endCall(true);
             }
         });
+    }
+
+    hideWaitingForVideo() {
+        if (this.elements.waitingForVideo) {
+            this.elements.waitingForVideo.classList.remove('show');
+        }
     }
 
     setStatus(message) {

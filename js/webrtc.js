@@ -116,6 +116,10 @@ class WebRTCManager {
             const remoteVideo = document.getElementById('remoteVideo');
             if (remoteVideo) {
                 remoteVideo.srcObject = this.remoteStream;
+                // Try to kick playback for iOS Safari
+                if (typeof remoteVideo.play === 'function') {
+                    remoteVideo.play().catch(() => {});
+                }
             }
         }
         
@@ -123,9 +127,11 @@ class WebRTCManager {
         
         if (event.track.kind === 'video') {
             this.remoteVideoReceived = true;
-            const waitingElement = document.getElementById('waitingForVideo');
-            if (waitingElement) {
-                waitingElement.classList.remove('show');
+            if (typeof uiManager?.hideWaitingForVideo === 'function') {
+                uiManager.hideWaitingForVideo();
+            } else {
+                const waitingElement = document.getElementById('waitingForVideo');
+                if (waitingElement) waitingElement.classList.remove('show');
             }
             uiManager.setStatus('Подключено!');
             this.clearConnectionTimeout();
