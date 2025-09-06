@@ -4,6 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Video Call</title>
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
     <style>
         * {
             margin: 0;
@@ -210,6 +213,7 @@
         let peerConnection = null;
         let roomId = null;
         let isInitiator = false;
+        const appVersion = 'v2025-09-06a';
         
         const configuration = {
             iceServers: [
@@ -231,6 +235,11 @@
         const copyBtn = document.getElementById('copyBtn');
         const shareBtn = document.getElementById('shareBtn');
         const status = document.getElementById('status');
+
+        function setStatus(msg) {
+            status.textContent = msg;
+            status.style.display = 'block';
+        }
         
         // Check if joining a room
         const urlParams = new URLSearchParams(window.location.search);
@@ -291,7 +300,7 @@
                 videoContainer.style.display = 'block';
                 
                 // Setup WebRTC
-                status.textContent = 'Waiting for the call to start...';
+                setStatus('Waiting for the call to start...');
                 await setupWebRTC();
                 
             } catch (err) {
@@ -372,11 +381,30 @@
             peerConnection.onconnectionstatechange = function() {
                 if (peerConnection.connectionState === 'connected') {
                     status.style.display = 'none';
+                } else if (peerConnection.connectionState === 'connecting') {
+                    setStatus('Connecting...');
                 } else if (peerConnection.connectionState === 'failed') {
-                    status.textContent = 'Connection failed';
-                    status.style.display = 'block';
+                    setStatus('Connection failed');
+                } else if (peerConnection.connectionState === 'disconnected') {
+                    setStatus('Disconnected');
                 }
             };
+
+            // More detailed ICE state reporting
+            peerConnection.oniceconnectionstatechange = function() {
+                const st = peerConnection.iceConnectionState;
+                if (st === 'checking') setStatus('Finding a route (ICE: checking)...');
+                if (st === 'connected') status.style.display = 'none';
+                if (st === 'completed') status.style.display = 'none';
+                if (st === 'failed') setStatus('Could not traverse NAT (need TURN).');
+            };
+            peerConnection.onicegatheringstatechange = function() {
+                const gst = peerConnection.iceGatheringState;
+                if (gst === 'gathering') setStatus('Gathering network info...');
+            };
+            peerConnection.addEventListener('icecandidateerror', function(e) {
+                setStatus('ICE error: ' + (e.errorText || e.errorCode));
+            });
             
             if (isInitiator) {
                 // Create offer
@@ -423,17 +451,24 @@
                             type: answer.type,
                             sdp: answer.sdp
                         });
-                        status.textContent = 'Connecting...';
+                        setStatus('Connecting...');
                         // We can stop listening for offer after handling it
                         offerRef.off('value', handleOffer);
                         clearTimeout(waitNote1);
                         clearTimeout(waitNote2);
                     } catch (e) {
                         console.error('Failed handling offer:', e);
-                        status.textContent = 'Failed to join. Retrying...';
+                        setStatus('Failed to join. Retrying...');
                     }
                 };
                 offerRef.on('value', handleOffer);
+            }
+
+            // Debug surface to help diagnose in-field
+            if (new URLSearchParams(location.search).get('debug') === '1') {
+                console.log('App version', appVersion);
+                window.__webrtc = { peerConnection, localStream, remoteStream };
+                setStatus('Debug ON ' + appVersion);
             }
             
             // Listen for ICE candidates
