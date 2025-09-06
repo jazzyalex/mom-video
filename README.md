@@ -44,7 +44,8 @@ The app is pre-configured with a test Firebase project. You can use it immediate
 
 4. **Update the App**
    - Open `index.html`
-   - Replace the firebaseConfig object (lines 193-200) with your config
+   - Replace the firebaseConfig object with your config
+   - Ensure `databaseURL` matches your Realtime Database URL (looks like `https://<your-project>-default-rtdb.firebaseio.com`)
 
 ## Deployment Options
 
@@ -107,6 +108,11 @@ The app is pre-configured with a test Firebase project. You can use it immediate
 - Both people need good internet (WiFi preferred)
 - Try refreshing the page
 - Create a new call link
+ - If calls don’t connect on cellular, add a TURN server (required for some networks).
+
+**TURN (recommended for reliability):**
+- WebRTC needs a TURN server to relay media when direct connection isn’t possible (e.g., carrier NAT, strict firewalls).
+- Options: Twilio/Nexus/TykTurn or self-host coturn. Add credentials to the `iceServers` array in `index.html`.
 
 **Old Android specific:**
 - Use Chrome or Samsung Internet browser

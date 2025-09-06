@@ -194,7 +194,9 @@
           storageBucket: "mom-video-call.firebasestorage.app",
           messagingSenderId: "1051927207225",
           appId: "1:1051927207225:web:88d8d895d135e6ed9e5ce8",
-          measurementId: "G-JLVCBM279E"
+          measurementId: "G-JLVCBM279E",
+          // Explicitly set Realtime Database URL to avoid default mismatch
+          databaseURL: "https://mom-video-call-default-rtdb.firebaseio.com"
         };
 
         // Initialize Firebase (v8 namespaced API)
@@ -289,6 +291,7 @@
                 videoContainer.style.display = 'block';
                 
                 // Setup WebRTC
+                status.textContent = 'Waiting for the call to start...';
                 await setupWebRTC();
                 
             } catch (err) {
@@ -395,27 +398,42 @@
                         // Show video container
                         startScreen.style.display = 'none';
                         videoContainer.style.display = 'block';
+                        status.textContent = 'Connecting...';
                     }
                 });
                 
             } else {
-                // Get offer from Firebase
-                const offerSnapshot = await database.ref('rooms/' + roomId + '/offer').once('value');
-                const offer = offerSnapshot.val();
-                
-                if (offer) {
-                    await peerConnection.setRemoteDescription(new RTCSessionDescription(offer));
-                    
-                    // Create answer
-                    const answer = await peerConnection.createAnswer();
-                    await peerConnection.setLocalDescription(answer);
-                    
-                    // Store answer in Firebase
-                    await database.ref('rooms/' + roomId + '/answer').set({
-                        type: answer.type,
-                        sdp: answer.sdp
-                    });
-                }
+                // Joiner: wait for offer (handles race where joiner arrives first)
+                const offerRef = database.ref('rooms/' + roomId + '/offer');
+                // Gentle UX: update status if taking long
+                let waitNote1 = setTimeout(() => {
+                    status.textContent = 'Still waiting for the caller…';
+                }, 15000);
+                let waitNote2 = setTimeout(() => {
+                    status.textContent = 'No call yet. Ask them to tap Start and resend the link.';
+                }, 45000);
+                const handleOffer = async function(snapshot) {
+                    const offer = snapshot.val();
+                    if (!offer || peerConnection.currentRemoteDescription) return;
+                    try {
+                        await peerConnection.setRemoteDescription(new RTCSessionDescription(offer));
+                        const answer = await peerConnection.createAnswer();
+                        await peerConnection.setLocalDescription(answer);
+                        await database.ref('rooms/' + roomId + '/answer').set({
+                            type: answer.type,
+                            sdp: answer.sdp
+                        });
+                        status.textContent = 'Connecting...';
+                        // We can stop listening for offer after handling it
+                        offerRef.off('value', handleOffer);
+                        clearTimeout(waitNote1);
+                        clearTimeout(waitNote2);
+                    } catch (e) {
+                        console.error('Failed handling offer:', e);
+                        status.textContent = 'Failed to join. Retrying...';
+                    }
+                };
+                offerRef.on('value', handleOffer);
             }
             
             // Listen for ICE candidates
